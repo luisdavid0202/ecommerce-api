@@ -59,11 +59,11 @@ namespace ECommerce.Backend.Api.Controllers
         [AllowAnonymous]
         public IActionResult Login(User user)
         {
-            var userEmail = _dbContext.Users.FirstOrDefault(u => u.Email == user.Email);
+            var userData = _dbContext.Users.FirstOrDefault(u => u.Email == user.Email);
 
-            if (userEmail == null) return StatusCode(StatusCodes.Status404NotFound);
+            if (userData == null) return StatusCode(StatusCodes.Status404NotFound);
 
-            var hashedPassword = userEmail.Password;
+            var hashedPassword = userData.Password;
 
             if (!SecurePasswordHasherHelper.Verify(user.Password, hashedPassword)) return Unauthorized();
 
@@ -73,7 +73,8 @@ namespace ECommerce.Backend.Api.Controllers
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(ClaimTypes.Name, user.Email),
-                new Claim(ClaimTypes.Role, userEmail.Role)
+                new Claim(ClaimTypes.Role, userData.Role),
+                new Claim("userId", userData.Id.ToString())
             };
             
             var token = _auth.GenerateAccessToken(claims);
@@ -82,8 +83,8 @@ namespace ECommerce.Backend.Api.Controllers
             {
                 access_token = token.AccessToken,
                 token_type = token.TokenType,
-                user_Id = userEmail.Id,
-                user_name = userEmail.Name,
+                user_Id = userData.Id,
+                user_name = userData.Name,
                 expires_in = token.ExpiresIn,
                 creation_Time = token.ValidFrom,
                 expiration_Time = token.ValidTo,

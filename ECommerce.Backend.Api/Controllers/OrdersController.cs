@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ECommerce.Backend.Api.DbContext;
+using ECommerce.Backend.Api.Helpers;
 using ECommerce.Backend.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -39,6 +40,7 @@ namespace ECommerce.Backend.Api.Controllers
 
         // GET: api/Orders/OrdersByUser/5
         [HttpGet("[action]/{userId}")]
+        [ValidateUser]
         public IActionResult OrdersByUser(int userId)
         {
             var orders = _dbContext.Orders.Where(order => order.UserId == userId).OrderByDescending(o => o.OrderPlaced);

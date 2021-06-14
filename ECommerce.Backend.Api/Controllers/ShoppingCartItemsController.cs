@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using ECommerce.Backend.Api.DbContext;
+using ECommerce.Backend.Api.Helpers;
 using ECommerce.Backend.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -27,8 +28,11 @@ namespace ECommerce.Backend.Api.Controllers
         #region API
         // GET: api/ShoppingCartItems
         [HttpGet("{userId}")]
+        [ValidateUser]
         public IActionResult Get(int userId)
         {
+            if (HttpContext.User.Claims.FirstOrDefault(x => x.Type == "userId").Value != userId.ToString()) return Unauthorized();
+
             var user = _dbContext.ShoppingCartItems.Where(s => s.CustomerId == userId);
 
             if (user == null)
@@ -51,8 +55,8 @@ namespace ECommerce.Backend.Api.Controllers
         }
 
         // GET: api/ShoppingCartItems/SubTotal/5
-
         [HttpGet("[action]/{userId}")]
+        [ValidateUser]
         public IActionResult SubTotal(int userId)
         {
             var subTotal = (from cart in _dbContext.ShoppingCartItems
@@ -62,9 +66,9 @@ namespace ECommerce.Backend.Api.Controllers
             return Ok(new { SubTotal = subTotal });
         }
 
-
         // GET: api/ShoppingCartItems/TotalItems/5
         [HttpGet("[action]/{userId}")]
+        [ValidateUser]
         public IActionResult TotalItems(int userId)
         {
             var cartItems = (from cart in _dbContext.ShoppingCartItems
@@ -106,6 +110,7 @@ namespace ECommerce.Backend.Api.Controllers
 
         // DELETE: api/ApiWithActions/5
         [HttpDelete("{userId}")]
+        [ValidateUser]
         public IActionResult Delete(int userId)
         {
             var shoppingCart = _dbContext.ShoppingCartItems.Where(s => s.CustomerId == userId);
